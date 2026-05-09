@@ -29,7 +29,7 @@ export default function Dashboard({ onBack, dark, onToggle, th }) {
         classes: classTree.map((cls, ci) => ({
           id: `c${ci}`,
           name: cls.className,
-          type: inferType(cls.annotations),   // ✅ now reachable
+          type: inferType(cls.annotations),   
           methods: cls.methods.map((m, mi) => ({
             id: `m${ci}_${mi}`,
             name: m.name,
