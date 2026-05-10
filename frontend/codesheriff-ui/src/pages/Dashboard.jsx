@@ -53,3 +53,26 @@ export default function Dashboard({ onBack, dark, onToggle, th }) {
       setStatus("error");
     }
   }; 
+
+  const handleMethodSelect = async (method) => {
+    if (method.bob) { setSelectedMethod(method); return; }
+    setSelectedMethod({ ...method, bobLoading: true });
+    try {
+      const parentClass = analysis.classes.find(cls =>
+        cls.methods.some(m => m.id === method.id)
+      );
+      const classContext = parentClass.methods
+        .filter(m => m.id !== method.id)
+        .map(m => m.body || '')
+        .join('\n\n');
+      const bobResult = await analyzeMethod(
+        parentClass.name, method.name, method.body || '', classContext
+      );
+      const updatedMethod = { ...method, bob: bobResult, bobLoading: false };
+      setAnalysis(prev => ({
+        ...prev,
+        classes: prev.classes.map(cls => ({
+          ...cls,
+          methods: cls.methods.map(m => m.id === method.id ? updatedMethod : m)
+        }))
+      }));
