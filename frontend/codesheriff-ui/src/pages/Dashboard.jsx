@@ -3,7 +3,6 @@ import ThemeToggle from "../components/ThemeToggle";
 import UploadZone from "../components/UploadZone";
 import ClassTree from "../components/ClassTree";
 import MethodPanel from "../components/MethodPanel";
-import Ticker from "../components/Ticker";
 import { uploadAndParse, analyzeMethod } from "../api/api";
 
 export default function Dashboard({ onBack, dark, onToggle, th }) {
