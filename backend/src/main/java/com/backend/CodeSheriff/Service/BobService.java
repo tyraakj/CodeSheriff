@@ -37,7 +37,7 @@ public class BobService {
                 """
                    You are IBM Bob, a senior software engineer who specializes in explaining
                    complex Java code clearly and bluntly. You never sugarcoat problems.
-                        
+                
                    Analyze this Java method from class %s:
                         
                    METHOD NAME: %s
@@ -95,11 +95,11 @@ public class BobService {
         try {
             // Sometimes the AI adds "```json" to the front. We need to strip that away.
             JsonNode json = null;
+
             String cleaned = rawText
-                    .replaceAll("
-                            ```json", "")
-                                    .replaceAll("```", "")
-                                    .trim();
+                    .replace("```json", "")
+                    .replace("```", "")
+                    .trim();
 
             json = mapper.readTree(cleaned);
 
@@ -121,4 +121,4 @@ public class BobService {
         }
     }
 }
-}
+
