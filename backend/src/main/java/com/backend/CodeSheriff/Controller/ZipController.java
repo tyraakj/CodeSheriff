@@ -40,7 +40,7 @@ public class ZipController {
     private Map<String, String> extractJavaFilesFromZip(MultipartFile zipFile) throws IOException{
         Map<String, String> result = new HashMap<>();
 
-        try(ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipFile.getBytes()))) {
+        try(ZipInputStream zis = new ZipInputStream(zipFile.getInputStream())) {
 
             ZipEntry entry;
             while((entry = zis.getNextEntry()) != null){

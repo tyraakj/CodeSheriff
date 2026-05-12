@@ -18,7 +18,7 @@ public class BobService {
     @Value("${ibm.api.key}")
     private String apiKey;
 
-    @Value("${ibm.apiURL}")
+    @Value("${ibm.api.url}")
     private String apiUrl;
 
     private final WebClient webClient = WebClient.builder().build();
@@ -93,17 +93,10 @@ public class BobService {
 
     private BobAnalysis parseBobResponse(String rawText, String methodBody) {
         try {
-            // Sometimes the AI adds "```json" to the front. We need to strip that away.
-            JsonNode json = null;
+            String cleaned = rawText.replace("```json", "").replace("```", "").trim();
+            JsonNode json = mapper.readTree(cleaned);
 
-            String cleaned = rawText
-                    .replace("```json", "")
-                    .replace("```", "")
-                    .trim();
 
-            json = mapper.readTree(cleaned);
-
-            // Calculate a few extra stats about the code to send back
             int lineCount = methodBody.split("\n").length;
             boolean hasTests = methodBody.toLowerCase().contains("@test")
                     || methodBody.toLowerCase().contains("assert");

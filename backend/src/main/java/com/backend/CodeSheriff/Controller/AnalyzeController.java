@@ -1,8 +1,8 @@
 package com.backend.CodeSheriff.Controller;
 
+import com.backend.CodeSheriff.Model.AnalyzeRequest;
 import com.backend.CodeSheriff.Model.BobAnalysis;
 import com.backend.CodeSheriff.Service.BobService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +28,3 @@ public class AnalyzeController {
     }
 }
 
-@Data
-public class AnalyzeRequest{
-    private String className;
-    private String methodName;
-    private String methodBody;
-    private String allClassContext;
-}
