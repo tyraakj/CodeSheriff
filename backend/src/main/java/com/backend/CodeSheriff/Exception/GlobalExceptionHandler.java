@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_GATEWAY.value())
                 .error("AI Service Unavailable")
-                .message("Failed to communicate with IBM Watsonx. Please try again later.")
+                .message("Failed to communicate with IBM Bob. Please try again later.")
                 .build();
 
         return new ResponseEntity<>(errorBody, HttpStatus.BAD_GATEWAY);
@@ -39,5 +39,19 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errorBody, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleMaxSizeException(org.springframework.web.multipart.MaxUploadSizeExceededException exc) {
+        log.warn("User attempted to upload a file exceeding the size limit.");
+
+        ApiErrorResponse errorBody = ApiErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONTENT_TOO_LARGE.value()) // HTTP 413
+                .error("Payload Too Large")
+                .message("File is too large! Please upload a ZIP file smaller than 100MB.")
+                .build();
+
+        return new ResponseEntity<>(errorBody, HttpStatus.CONTENT_TOO_LARGE);
     }
 }
