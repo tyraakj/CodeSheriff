@@ -1,10 +1,13 @@
 package com.backend.CodeSheriff.Service;
 
+
+import com.backend.CodeSheriff.Exception.AiIntegrationException;
 import com.backend.CodeSheriff.Model.BobAnalysis;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,17 +62,17 @@ public class BobService {
                 """.formatted(className, methodName, methodBody, classContext);
     }
 
-
-    private String callIbmBob(String prompt){
+    private String callIbmBob(String prompt) {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("input",prompt);
-
+        requestBody.put("input", prompt);
         requestBody.put("model_id", "meta-llama/llama-3-70b-instruct");
+
+
         requestBody.put("project_id", "YOUR-ACTUAL-PROJECT-ID-HERE");
 
         try {
             String response = webClient.post()
-                    .url(apiUrl)
+                    .uri(apiUrl)
                     .header("Authorization", "Bearer " + apiKey)
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
@@ -77,6 +80,45 @@ public class BobService {
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
+
+            // Extract just the AI's text from IBM's giant JSON response
+            JsonNode root = mapper.readTree(response);
+            return root.at("/results/0/generated_text").asText();
+
+        } catch (Exception e) {
+            // If IBM crashes, our GlobalExceptionHandler will catch this!
+            throw new AiIntegrationException("IBM API communication failed", e);
         }
     }
+
+    private BobAnalysis parseBobResponse(String rawText, String methodBody) {
+        try {
+            // Sometimes the AI adds "```json" to the front. We need to strip that away.
+            JsonNode json = null;
+            String cleaned = rawText
+                    .replaceAll("
+                            ```json", "")
+                                    .replaceAll("```", "")
+                                    .trim();
+
+            json = mapper.readTree(cleaned);
+
+            // Calculate a few extra stats about the code to send back
+            int lineCount = methodBody.split("\n").length;
+            boolean hasTests = methodBody.toLowerCase().contains("@test")
+                    || methodBody.toLowerCase().contains("assert");
+
+            return BobAnalysis.builder()
+                    .whatItDoes(json.get("whatItDoes").asText())
+                    .intentVsReality(json.get("intentVsReality").asText())
+                    .whereToStart(json.get("whereToStart").asText())
+                    .lineCount(lineCount)
+                    .hasTests(hasTests)
+                    .build();
+
+        } catch (Exception e) {
+            throw new AiIntegrationException("Failed to parse IBM JSON response", e);
+        }
+    }
+}
 }
