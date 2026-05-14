@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
-import Ticker from "../components/Ticker";
 import MockupCard from "../components/MockupCard";
 
 const FEATURES = [
@@ -235,12 +234,10 @@ export default function LandingPage({ onEnter, dark, onToggle }) {
       <div className="footer">
         <div className="footer-logo">CODESHERIFF</div>
         <div className="footer-text">
-          BUILT FOR IBM BOB HACKATHON · MAY 15–17 2026
+          Copyright © 2026 CodeSheriff. All rights reserved.
         </div>
         <div className="footer-text">BY TYRA</div>
       </div>
-
-      <Ticker />
     </div>
   );
 }
