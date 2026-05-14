@@ -5,7 +5,7 @@ export default function Navbar({ dark, onToggle, onEnter }) {
     <>
       <nav className="navbar">
         <div className="navbar-links">
-          {["PLATFORM", "HOW IT WORKS", "DOCS"].map((l) => (
+          {["HOW IT WORKS"].map((l) => (
             <button key={l} className="navbar-link">
               {l}
             </button>

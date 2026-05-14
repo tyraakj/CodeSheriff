@@ -2,7 +2,7 @@ import { useState } from "react";
 import { LIGHT, DARK } from "./theme";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
-import "./styles/global.css";
+import "./global.css";
 
 export default function App() {
   const [page, setPage] = useState("landing");
