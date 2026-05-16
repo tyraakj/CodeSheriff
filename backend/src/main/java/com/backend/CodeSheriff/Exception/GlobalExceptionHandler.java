@@ -43,11 +43,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiErrorResponse> handleMaxSizeException(org.springframework.web.multipart.MaxUploadSizeExceededException exc) {
-        log.warn("User attempted to upload a file exceeding the size limit.");
+        log.warn("User attempted to upload a file exceeding the size limit.{}", exc.getMessage());
 
         ApiErrorResponse errorBody = ApiErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.CONTENT_TOO_LARGE.value()) // HTTP 413
+                .status(HttpStatus.CONTENT_TOO_LARGE.value())
                 .error("Payload Too Large")
                 .message("File is too large! Please upload a ZIP file smaller than 100MB.")
                 .build();
