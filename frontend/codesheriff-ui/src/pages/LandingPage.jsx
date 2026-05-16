@@ -79,7 +79,7 @@ const STEPS = [
   },
 ];
 
-export default function LandingPage({ onEnter, dark, onToggle }) {
+export default function LandingPage({ onEnter, onSignIn, dark, onToggle, th }) {
   const [typed, setTyped] = useState("");
   const full = "MESSY.";
 
@@ -94,7 +94,12 @@ export default function LandingPage({ onEnter, dark, onToggle }) {
 
   return (
     <div className="landing">
-      <Navbar dark={dark} onToggle={onToggle} onEnter={onEnter} />
+      <Navbar
+        dark={dark}
+        onToggle={onToggle}
+        onEnter={onEnter}
+        onSignIn={onSignIn}
+      />
 
       {/* HERO */}
       <div className="hero">
