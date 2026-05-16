@@ -1,17 +1,22 @@
 package com.backend.CodeSheriff.Service;
 
-
 import com.backend.CodeSheriff.Exception.AiIntegrationException;
 import com.backend.CodeSheriff.Model.BobAnalysis;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class BobService {
@@ -21,8 +26,25 @@ public class BobService {
     @Value("${ibm.api.url}")
     private String apiUrl;
 
-    private final WebClient webClient = WebClient.builder().build();
+    @Value("${ibm.project.id:}")
+    private String projectId;
+
+    private final WebClient webClient;
     private final ObjectMapper mapper = new ObjectMapper();
+
+    public BobService() {
+        // Configure WebClient with timeouts
+        HttpClient httpClient = HttpClient.create()
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+            .responseTimeout(Duration.ofSeconds(30))
+            .doOnConnected(conn ->
+                conn.addHandlerLast(new ReadTimeoutHandler(30, TimeUnit.SECONDS))
+                    .addHandlerLast(new WriteTimeoutHandler(30, TimeUnit.SECONDS)));
+
+        this.webClient = WebClient.builder()
+            .clientConnector(new ReactorClientHttpConnector(httpClient))
+            .build();
+    }
 
     public BobAnalysis analyze (String className, String methodName, String methodBody , String classContext){
 
@@ -66,9 +88,20 @@ public class BobService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("input", prompt);
         requestBody.put("model_id", "meta-llama/llama-3-70b-instruct");
-
-
-        requestBody.put("project_id", "YOUR-ACTUAL-PROJECT-ID-HERE");
+        
+        // Use configured project ID
+        if (projectId != null && !projectId.isEmpty()) {
+            requestBody.put("project_id", projectId);
+        } else {
+            throw new AiIntegrationException("IBM project ID not configured", null);
+        }
+        
+        // Add parameters for better control
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("max_new_tokens", 2000);
+        parameters.put("temperature", 0.7);
+        parameters.put("top_p", 0.9);
+        requestBody.put("parameters", parameters);
 
         try {
             String response = webClient.post()

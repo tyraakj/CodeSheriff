@@ -1,9 +1,9 @@
 const ITEMS = [
   { label: "WHAT IT DOES", key: "whatItDoes", color: "var(--text)" },
   { label: "INTENT VS REALITY", key: "intentVsReality", color: "#d4913a" },
-  { label: "WHY IT'S CONFUSING", key: "whyConfusing", color: "#e05555" },
-  { label: "WHO DEPENDS ON IT", key: "dependencies", color: "#9c6fc5" },
   { label: "WHERE TO START", key: "whereToStart", color: "var(--accent)" },
+  { label: "LINE COUNT", key: "lineCount", color: "#9c6fc5" },
+  { label: "HAS TESTS", key: "hasTests", color: "#5ea85e" },
 ];
 
 export default function BobInvestigation({ method }) {
@@ -19,7 +19,11 @@ export default function BobInvestigation({ method }) {
             <span className="bob-card-dot" style={{ background: item.color }} />
             {item.label}
           </div>
-          <div className="bob-card-text">{method.bob[item.key]}</div>
+          <div className="bob-card-text">
+            {item.key === "hasTests"
+              ? (method.bob[item.key] ? "✓ Yes" : "✗ No")
+              : method.bob[item.key]}
+          </div>
         </div>
       ))}
     </div>
