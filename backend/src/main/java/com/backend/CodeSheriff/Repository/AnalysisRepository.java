@@ -3,6 +3,8 @@ package com.backend.CodeSheriff.Repository;
 import com.backend.CodeSheriff.Entity.Analysis;
 import com.backend.CodeSheriff.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,7 +20,6 @@ import java.util.UUID;
  */
 @Repository
 public interface AnalysisRepository extends JpaRepository<Analysis, UUID> {
-
     /**
      * Find all analyses for a specific user.
      * @param user the user
@@ -32,6 +33,10 @@ public interface AnalysisRepository extends JpaRepository<Analysis, UUID> {
      * @return list of analyses
      */
     List<Analysis> findByUserUserId(UUID userId);
+
+    Page<Analysis> findByUserUserId(UUID userId, Pageable pageable);
+
+    Optional<Analysis> findByUserUserIdAndProjectName(UUID userId, String projectName);
 
     /**
      * Find analyses by status.

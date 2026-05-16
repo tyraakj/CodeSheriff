@@ -79,7 +79,7 @@ const STEPS = [
   },
 ];
 
-export default function LandingPage({ onEnter, onSignIn, dark, onToggle, th }) {
+export default function LandingPage({ onEnter, onSignIn, dark, onToggle }) {
   const [typed, setTyped] = useState("");
   const full = "MESSY.";
 

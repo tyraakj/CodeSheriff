@@ -2,7 +2,7 @@ import { useState } from "react";
 import Navbar from "../components/Navbar";
 import "./Login.css";
 
-export default function Login({ onBack, onLoginSuccess, dark, onToggle, th }) {
+export default function Login({ onBack, onLoginSuccess, dark, onToggle }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);

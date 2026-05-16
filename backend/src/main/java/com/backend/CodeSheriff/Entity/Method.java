@@ -170,6 +170,10 @@ public class Method {
         return methodId;
     }
 
+    public UUID getId() {
+        return methodId;
+    }
+
     public void setMethodId(UUID methodId) {
         this.methodId = methodId;
     }
@@ -318,12 +322,36 @@ public class Method {
         this.bobOutput = bobOutput;
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public List<String> getModifiers() {
+        List<String> modifiers = new ArrayList<>();
+        if (visibility != null && !visibility.isBlank()) modifiers.add(visibility);
+        if (Boolean.TRUE.equals(isStatic)) modifiers.add("static");
+        if (Boolean.TRUE.equals(isAbstract)) modifiers.add("abstract");
+        if (Boolean.TRUE.equals(isFinal)) modifiers.add("final");
+        if (Boolean.TRUE.equals(isSynchronized)) modifiers.add("synchronized");
+        return modifiers;
+    }
+
+    public Boolean getIsConstructor() {
+        return returnType == null || returnType.isBlank();
+    }
+
+    public void setIsConstructor(Boolean isConstructor) {
+        if (Boolean.TRUE.equals(isConstructor)) {
+            this.returnType = null;
+        }
+    }
+
+    public String getComplexityLevel() {
+        if (cyclomaticComplexity == null) return "unknown";
+        if (cyclomaticComplexity <= 5) return "simple";
+        if (cyclomaticComplexity <= 10) return "moderate";
+        if (cyclomaticComplexity <= 20) return "complex";
+        return "very_complex";
     }
 
     public Integer getLineStart() {

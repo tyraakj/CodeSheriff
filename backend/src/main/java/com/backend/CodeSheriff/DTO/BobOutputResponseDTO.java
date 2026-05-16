@@ -38,6 +38,7 @@ public class BobOutputResponseDTO {
     // Additional fields for controllers
     private Integer securityFlagCount;
     private Integer criticalFlagCount;
+    private UUID securityScanId;
     
     // Constructor
     public BobOutputResponseDTO() {
@@ -149,6 +150,9 @@ public class BobOutputResponseDTO {
     
     public Integer getCriticalFlagCount() { return criticalFlagCount; }
     public void setCriticalFlagCount(Integer criticalFlagCount) { this.criticalFlagCount = criticalFlagCount; }
+
+    public UUID getSecurityScanId() { return securityScanId; }
+    public void setSecurityScanId(UUID securityScanId) { this.securityScanId = securityScanId; }
 }
 
 // Made with Bob

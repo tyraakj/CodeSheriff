@@ -2,6 +2,8 @@ package com.backend.CodeSheriff.Repository;
 
 import com.backend.CodeSheriff.Entity.BobOutput;
 import com.backend.CodeSheriff.Entity.Method;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,6 +33,8 @@ public interface BobOutputRepository extends JpaRepository<BobOutput, UUID> {
      * @return Optional containing the Bob output if found
      */
     Optional<BobOutput> findByMethodMethodId(UUID methodId);
+
+    Page<BobOutput> findAllByMethodMethodId(UUID methodId, Pageable pageable);
 
     /**
      * Find all outputs by risk level.

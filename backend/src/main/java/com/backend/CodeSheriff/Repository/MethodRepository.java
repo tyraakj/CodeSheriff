@@ -2,6 +2,8 @@ package com.backend.CodeSheriff.Repository;
 
 import com.backend.CodeSheriff.Entity.JavaClass;
 import com.backend.CodeSheriff.Entity.Method;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -145,6 +147,9 @@ public interface MethodRepository extends JpaRepository<Method, UUID> {
      */
     @Query("SELECT m FROM Method m WHERE m.javaClass.analysis.analysisId = :analysisId")
     List<Method> findByAnalysisId(@Param("analysisId") UUID analysisId);
+
+    @Query("SELECT m FROM Method m WHERE m.javaClass.analysis.analysisId = :analysisId")
+    Page<Method> findByAnalysisId(@Param("analysisId") UUID analysisId, Pageable pageable);
 }
 
 // Made with Bob

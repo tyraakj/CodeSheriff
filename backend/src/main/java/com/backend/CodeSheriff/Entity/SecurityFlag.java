@@ -146,6 +146,10 @@ public class SecurityFlag {
         return flagId;
     }
 
+    public UUID getId() {
+        return flagId;
+    }
+
     public void setFlagId(UUID flagId) {
         this.flagId = flagId;
     }

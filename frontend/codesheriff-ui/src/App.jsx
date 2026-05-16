@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { LIGHT, DARK } from "./theme";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
@@ -15,8 +15,19 @@ export default function App() {
   const th = dark ? DARK : LIGHT;
   const toggle = () => setDark((d) => !d);
 
+  const checkUser = useCallback(async () => {
+    try {
+      const currentUser = await authService.getUser();
+      setUser(currentUser);
+    } catch (error) {
+      console.error("Error checking user:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    checkUser();
+    void Promise.resolve().then(checkUser);
 
     const {
       data: { subscription },
@@ -26,18 +37,7 @@ export default function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      const currentUser = await authService.getUser();
-      setUser(currentUser);
-    } catch (error) {
-      console.error("Error checking user:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [checkUser]);
 
   const handleAuthSuccess = (authenticatedUser) => {
     setUser(authenticatedUser);

@@ -29,8 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -86,7 +89,7 @@ public class ZipController {
         zipFileValidator.validate(zipFile);
 
         // Get or create user
-        User user = userService.getOrCreateUser(userId, null, ipAddress);
+        User user = userService.getOrCreateUser(userId, null);
 
         // Create analysis
         String fileName = zipFile.getOriginalFilename();
@@ -120,7 +123,7 @@ public class ZipController {
                 // Add methods
                 for (MethodInfo methodInfo : classInfo.getMethods()) {
                     Method method = convertToEntity(methodInfo, javaClass);
-                    analysisService.addMethod(javaClass.getId(), method);
+                    analysisService.addMethod(javaClass.getClassId(), method);
                 }
             }
 
@@ -188,7 +191,7 @@ public class ZipController {
      */
     @GetMapping("/analyses/{analysisId}")
     public ResponseEntity<AnalysisResponseDTO> getAnalysis(
-            @PathVariable Long analysisId,
+            @PathVariable UUID analysisId,
             @AuthenticationPrincipal String userId) {
 
         log.info("Fetching analysis {} for user: {}", analysisId, userId);
@@ -196,7 +199,7 @@ public class ZipController {
         Analysis analysis = analysisService.getAnalysisById(analysisId);
         
         // Verify ownership
-        if (!analysis.getUser().getSupabaseId().equals(userId)) {
+        if (!analysis.getUser().getUserId().toString().equals(userId)) {
             log.warn("User {} attempted to access analysis {} owned by another user",
                 userId, analysisId);
             return ResponseEntity.status(403).build();
@@ -214,7 +217,7 @@ public class ZipController {
      */
     @DeleteMapping("/analyses/{analysisId}")
     public ResponseEntity<Void> deleteAnalysis(
-            @PathVariable Long analysisId,
+            @PathVariable UUID analysisId,
             @AuthenticationPrincipal String userId,
             HttpServletRequest request) {
 
@@ -225,7 +228,7 @@ public class ZipController {
         Analysis analysis = analysisService.getAnalysisById(analysisId);
         
         // Verify ownership
-        if (!analysis.getUser().getSupabaseId().equals(userId)) {
+        if (!analysis.getUser().getUserId().toString().equals(userId)) {
             log.warn("User {} attempted to delete analysis {} owned by another user",
                 userId, analysisId);
             return ResponseEntity.status(403).build();
@@ -270,18 +273,13 @@ public class ZipController {
     private JavaClass convertToEntity(ClassInfo classInfo, Analysis analysis) {
         JavaClass javaClass = new JavaClass(analysis, classInfo.getClassName());
         javaClass.setPackageName(classInfo.getPackageName());
-        javaClass.setFullyQualifiedName(classInfo.getFullyQualifiedName());
-        javaClass.setClassType(classInfo.getClassType());
-        javaClass.setModifiers(classInfo.getModifiers());
         javaClass.setIsAbstract(classInfo.getIsAbstract());
-        javaClass.setIsFinal(classInfo.getIsFinal());
-        javaClass.setIsStatic(classInfo.getIsStatic());
-        javaClass.setExtendedClass(classInfo.getExtendedClass());
-        javaClass.setImplementedInterfaces(classInfo.getImplementedInterfaces());
+        javaClass.setIsInterface("interface".equalsIgnoreCase(classInfo.getClassType()));
+        javaClass.setIsEnum("enum".equalsIgnoreCase(classInfo.getClassType()));
+        javaClass.setExtendsClass(classInfo.getExtendedClass());
+        javaClass.setImplementsInterfaces(splitCsv(classInfo.getImplementedInterfaces()));
         javaClass.setAnnotations(classInfo.getAnnotations());
-        javaClass.setFields(classInfo.getFields());
         javaClass.setSourceCode(classInfo.getSourceCode());
-        javaClass.setJavadoc(classInfo.getJavadoc());
         return javaClass;
     }
 
@@ -291,8 +289,7 @@ public class ZipController {
     private Method convertToEntity(MethodInfo methodInfo, JavaClass javaClass) {
         Method method = new Method(javaClass, methodInfo.getMethodName());
         method.setReturnType(methodInfo.getReturnType());
-        method.setParameters(methodInfo.getParameters());
-        method.setModifiers(methodInfo.getModifiers());
+        method.setParameters(splitCsv(methodInfo.getParameters()));
         method.setVisibility(methodInfo.getVisibility());
         method.setIsStatic(methodInfo.getIsStatic());
         method.setIsFinal(methodInfo.getIsFinal());
@@ -308,13 +305,23 @@ public class ZipController {
         method.setLocalVariableCount(methodInfo.getLocalVariableCount());
         method.setSourceCode(methodInfo.getSourceCode());
         method.setJavadoc(methodInfo.getJavadoc());
-        method.setAnnotations(methodInfo.getAnnotations());
-        method.setThrownExceptions(methodInfo.getThrownExceptions());
+        method.setAnnotations(splitCsv(methodInfo.getAnnotations()));
+        method.setThrowsExceptions(splitCsv(methodInfo.getThrownExceptions()));
         method.setCalledMethods(methodInfo.getCalledMethods());
         method.setHasLoops(methodInfo.getHasLoops());
         method.setHasConditionals(methodInfo.getHasConditionals());
         method.setHasTryCatch(methodInfo.getHasTryCatch());
         return method;
+    }
+
+    private List<String> splitCsv(String value) {
+        if (value == null || value.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(value.split(","))
+            .map(String::trim)
+            .filter(item -> !item.isEmpty())
+            .collect(Collectors.toList());
     }
 
     /**

@@ -7,7 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for SecurityFlag entity responses
@@ -23,8 +25,8 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SecurityFlagResponseDTO {
     
-    private Long id;
-    private Long securityScanId;
+    private UUID id;
+    private UUID securityScanId;
     private String flagType;
     private String severity;
     private String title;
@@ -35,14 +37,14 @@ public class SecurityFlagResponseDTO {
     private String recommendation;
     private String cweId;
     private String owaspCategory;
-    private Double confidenceScore;
+    private Integer confidenceScore;
     private String status;
     private String resolution;
     private String resolvedBy;
-    private LocalDateTime resolvedAt;
+    private Instant resolvedAt;
     private Boolean falsePositive;
     private String falsePositiveReason;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     private LocalDateTime updatedAt;
     
     // Context information
@@ -60,7 +62,7 @@ public class SecurityFlagResponseDTO {
         
         SecurityFlagResponseDTOBuilder builder = SecurityFlagResponseDTO.builder()
             .id(flag.getId())
-            .securityScanId(flag.getSecurityScan() != null ? flag.getSecurityScan().getId() : null)
+            .securityScanId(flag.getSecurityScan() != null ? flag.getSecurityScan().getScanId() : null)
             .flagType(flag.getFlagType())
             .severity(flag.getSeverity())
             .title(flag.getTitle())
@@ -88,9 +90,8 @@ public class SecurityFlagResponseDTO {
                 builder.className(flag.getMethod().getJavaClass().getClassName());
                 builder.packageName(flag.getMethod().getJavaClass().getPackageName());
             }
-        } else if (flag.getJavaClass() != null) {
-            builder.className(flag.getJavaClass().getClassName());
-            builder.packageName(flag.getJavaClass().getPackageName());
+        } else if (flag.getClassName() != null) {
+            builder.className(flag.getClassName());
         }
         
         return builder.build();

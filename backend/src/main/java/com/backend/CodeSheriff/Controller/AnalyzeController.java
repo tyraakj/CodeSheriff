@@ -21,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -107,7 +108,7 @@ public class AnalyzeController {
             bobOutput.setAnalysisText(bobAnalysis.getAnalysis());
             bobOutput.setComplexityAssessment(bobAnalysis.getComplexityAssessment());
             bobOutput.setTestCoverage(bobAnalysis.getTestCoverage());
-            bobOutput.setConfidenceScore(bobAnalysis.getConfidenceScore());
+            bobOutput.setConfidenceScore((int) Math.round(bobAnalysis.getConfidenceScore()));
             bobOutput.setModelUsed("llama-3-70b-instruct");
             bobOutput.setPromptTokens(bobAnalysis.getPromptTokens());
             bobOutput.setCompletionTokens(bobAnalysis.getCompletionTokens());
@@ -115,19 +116,19 @@ public class AnalyzeController {
             bobOutput.setResponseTimeMs(bobAnalysis.getResponseTimeMs());
 
             // Persist Bob output
-            bobOutput = analysisService.addBobOutput(method.getId(), bobOutput);
+            bobOutput = analysisService.addBobOutput(method.getMethodId(), bobOutput);
 
             // Run full security pipeline
             SecurityPipelineService.SecurityPipelineResult pipelineResult =
-                securityPipelineService.runFullPipeline(analysis, user, request);
+                securityPipelineService.runFullPipeline(analysis, user, httpRequest);
 
             // Log analysis in audit trail
             auditTrailService.logBobAnalysis(
                 user,
-                analysis,
-                method,
-                bobOutput,
-                ipAddress
+                method.getMethodId(),
+                bobOutput.getRiskLevel(),
+                bobOutput.getResponseTimeMs() != null ? bobOutput.getResponseTimeMs() : 0L,
+                httpRequest
             );
 
             log.info("Analysis completed for user: {}, method: {}, security flags: {}",
@@ -138,7 +139,7 @@ public class AnalyzeController {
             
             // Add security scan info if available
             if (pipelineResult.getSecurityScan() != null) {
-                response.setSecurityScanId(pipelineResult.getSecurityScan().getId());
+                response.setSecurityScanId(pipelineResult.getSecurityScan().getScanId());
                 response.setSecurityFlagCount(pipelineResult.getTotalFlags());
                 response.setCriticalFlagCount(pipelineResult.getCriticalFlags());
             }
@@ -162,7 +163,7 @@ public class AnalyzeController {
      */
     @PostMapping("/analyses/{analysisId}/security-scan")
     public ResponseEntity<SecurityScanResponseDTO> runSecurityScan(
-            @PathVariable Long analysisId,
+            @PathVariable UUID analysisId,
             @AuthenticationPrincipal String userId,
             HttpServletRequest httpRequest) {
 
@@ -175,7 +176,7 @@ public class AnalyzeController {
         Analysis analysis = analysisService.getAnalysisById(analysisId);
 
         // Verify ownership
-        if (!analysis.getUser().getSupabaseId().equals(userId)) {
+        if (!analysis.getUser().getUserId().toString().equals(userId)) {
             log.warn("User {} attempted to scan analysis {} owned by another user",
                 userId, analysisId);
             return ResponseEntity.status(403).build();
@@ -189,7 +190,7 @@ public class AnalyzeController {
 
             // Run full security pipeline
             SecurityPipelineService.SecurityPipelineResult result =
-                securityPipelineService.runFullPipeline(analysis, user, request);
+                securityPipelineService.runFullPipeline(analysis, user, httpRequest);
 
             log.info("Security scan completed for analysis {}: {} total flags, {} critical",
                 analysisId, result.getTotalFlags(), result.getCriticalFlags());
@@ -213,7 +214,7 @@ public class AnalyzeController {
      */
     @GetMapping("/methods/{methodId}/analyses")
     public ResponseEntity<PagedResponseDTO<BobOutputResponseDTO>> getMethodAnalyses(
-            @PathVariable Long methodId,
+            @PathVariable UUID methodId,
             @AuthenticationPrincipal String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -223,7 +224,7 @@ public class AnalyzeController {
         Method method = analysisService.getMethodById(methodId);
         
         // Verify ownership
-        if (!method.getJavaClass().getAnalysis().getUser().getSupabaseId().equals(userId)) {
+        if (!method.getJavaClass().getAnalysis().getUser().getUserId().toString().equals(userId)) {
             log.warn("User {} attempted to access method {} owned by another user",
                 userId, methodId);
             return ResponseEntity.status(403).build();
@@ -250,7 +251,7 @@ public class AnalyzeController {
      */
     @GetMapping("/methods/{methodId}")
     public ResponseEntity<MethodResponseDTO> getMethod(
-            @PathVariable Long methodId,
+            @PathVariable UUID methodId,
             @AuthenticationPrincipal String userId,
             @RequestParam(defaultValue = "false") boolean includeAnalysis,
             @RequestParam(defaultValue = "false") boolean includeSecurityFlags) {
@@ -260,7 +261,7 @@ public class AnalyzeController {
         Method method = analysisService.getMethodById(methodId);
         
         // Verify ownership
-        if (!method.getJavaClass().getAnalysis().getUser().getSupabaseId().equals(userId)) {
+        if (!method.getJavaClass().getAnalysis().getUser().getUserId().toString().equals(userId)) {
             log.warn("User {} attempted to access method {} owned by another user",
                 userId, methodId);
             return ResponseEntity.status(403).build();
@@ -288,7 +289,7 @@ public class AnalyzeController {
      */
     @GetMapping("/analyses/{analysisId}/methods")
     public ResponseEntity<PagedResponseDTO<MethodResponseDTO>> getAnalysisMethods(
-            @PathVariable Long analysisId,
+            @PathVariable UUID analysisId,
             @AuthenticationPrincipal String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -300,7 +301,7 @@ public class AnalyzeController {
         Analysis analysis = analysisService.getAnalysisById(analysisId);
         
         // Verify ownership
-        if (!analysis.getUser().getSupabaseId().equals(userId)) {
+        if (!analysis.getUser().getUserId().toString().equals(userId)) {
             log.warn("User {} attempted to access analysis {} owned by another user",
                 userId, analysisId);
             return ResponseEntity.status(403).build();
@@ -330,7 +331,7 @@ public class AnalyzeController {
      */
     @GetMapping("/analyses/{analysisId}/security-scans")
     public ResponseEntity<PagedResponseDTO<SecurityScanResponseDTO>> getSecurityScans(
-            @PathVariable Long analysisId,
+            @PathVariable UUID analysisId,
             @AuthenticationPrincipal String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -340,7 +341,7 @@ public class AnalyzeController {
         Analysis analysis = analysisService.getAnalysisById(analysisId);
         
         // Verify ownership
-        if (!analysis.getUser().getSupabaseId().equals(userId)) {
+        if (!analysis.getUser().getUserId().toString().equals(userId)) {
             log.warn("User {} attempted to access analysis {} owned by another user",
                 userId, analysisId);
             return ResponseEntity.status(403).build();

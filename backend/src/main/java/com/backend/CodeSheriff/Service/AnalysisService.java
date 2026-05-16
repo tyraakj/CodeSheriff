@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
@@ -27,18 +29,21 @@ public class AnalysisService {
     private final MethodRepository methodRepository;
     private final BobOutputRepository bobOutputRepository;
     private final UserRepository userRepository;
+    private final SecurityScanRepository securityScanRepository;
 
     public AnalysisService(
             AnalysisRepository analysisRepository,
             JavaClassRepository javaClassRepository,
             MethodRepository methodRepository,
             BobOutputRepository bobOutputRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            SecurityScanRepository securityScanRepository) {
         this.analysisRepository = analysisRepository;
         this.javaClassRepository = javaClassRepository;
         this.methodRepository = methodRepository;
         this.bobOutputRepository = bobOutputRepository;
         this.userRepository = userRepository;
+        this.securityScanRepository = securityScanRepository;
     }
 
     /**
@@ -214,6 +219,11 @@ public class AnalysisService {
         return analysisRepository.findByUserUserId(userId);
     }
 
+    @Transactional(readOnly = true)
+    public Page<Analysis> getUserAnalyses(UUID userId, Pageable pageable) {
+        return analysisRepository.findByUserUserId(userId, pageable);
+    }
+
     /**
      * Get all Java classes for an analysis.
      * @param analysisId the analysis ID
@@ -232,6 +242,11 @@ public class AnalysisService {
     @Transactional(readOnly = true)
     public List<Method> getAnalysisMethods(UUID analysisId) {
         return methodRepository.findByAnalysisId(analysisId);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Method> getAnalysisMethods(UUID analysisId, Pageable pageable) {
+        return methodRepository.findByAnalysisId(analysisId, pageable);
     }
 
     /**
@@ -303,9 +318,9 @@ public class AnalysisService {
      * @return the method
      */
     @Transactional(readOnly = true)
-    public Method getMethodById(Long id) {
-        // Method uses UUID, but this method exists for compatibility
-        throw new UnsupportedOperationException("Method uses UUID, not Long");
+    public Method getMethodById(UUID id) {
+        return methodRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Method not found: " + id));
     }
 
     /**
@@ -315,9 +330,8 @@ public class AnalysisService {
      * @return page of Bob outputs
      */
     @Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<BobOutput> getMethodBobOutputs(Long methodId, org.springframework.data.domain.Pageable pageable) {
-        // Method uses UUID, but this method exists for compatibility
-        throw new UnsupportedOperationException("Method uses UUID, not Long");
+    public Page<BobOutput> getMethodBobOutputs(UUID methodId, Pageable pageable) {
+        return bobOutputRepository.findAllByMethodMethodId(methodId, pageable);
     }
 
     /**
@@ -327,9 +341,8 @@ public class AnalysisService {
      * @return page of security scans
      */
     @Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<SecurityScan> getSecurityScans(Long analysisId, org.springframework.data.domain.Pageable pageable) {
-        // Analysis uses UUID, but this method exists for compatibility
-        throw new UnsupportedOperationException("Analysis uses UUID, not Long");
+    public Page<SecurityScan> getSecurityScans(UUID analysisId, Pageable pageable) {
+        return securityScanRepository.findByAnalysisAnalysisId(analysisId, pageable);
     }
 
     /**

@@ -47,11 +47,11 @@ public class GlobalExceptionHandler {
 
         ApiErrorResponse errorBody = ApiErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.CONTENT_TOO_LARGE.value())
+                .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
                 .error("Payload Too Large")
                 .message("File is too large! Please upload a ZIP file smaller than 100MB.")
                 .build();
 
-        return new ResponseEntity<>(errorBody, HttpStatus.CONTENT_TOO_LARGE);
+        return new ResponseEntity<>(errorBody, HttpStatus.PAYLOAD_TOO_LARGE);
     }
 }

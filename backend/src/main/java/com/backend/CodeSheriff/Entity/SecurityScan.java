@@ -104,6 +104,10 @@ public class SecurityScan {
         return scanId;
     }
 
+    public UUID getId() {
+        return scanId;
+    }
+
     public void setScanId(UUID scanId) {
         this.scanId = scanId;
     }

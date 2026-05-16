@@ -7,8 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -25,8 +28,8 @@ import java.util.stream.Collectors;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MethodResponseDTO {
     
-    private Long id;
-    private Long javaClassId;
+    private UUID id;
+    private UUID javaClassId;
     private String className;
     private String packageName;
     private String methodName;
@@ -55,8 +58,8 @@ public class MethodResponseDTO {
     private Boolean hasConditionals;
     private Boolean hasTryCatch;
     private String complexityLevel;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private java.time.LocalDateTime updatedAt;
     
     // Analysis results
     private BobOutputResponseDTO bobAnalysis;
@@ -81,7 +84,7 @@ public class MethodResponseDTO {
         
         MethodResponseDTOBuilder builder = MethodResponseDTO.builder()
             .id(method.getId())
-            .javaClassId(method.getJavaClass() != null ? method.getJavaClass().getId() : null)
+            .javaClassId(method.getJavaClass() != null ? method.getJavaClass().getClassId() : null)
             .methodName(method.getMethodName())
             .returnType(method.getReturnType())
             .parameters(method.getParameters())
@@ -102,8 +105,8 @@ public class MethodResponseDTO {
             .sourceCode(method.getSourceCode())
             .javadoc(method.getJavadoc())
             .annotations(method.getAnnotations())
-            .thrownExceptions(method.getThrownExceptions())
-            .calledMethods(method.getCalledMethods())
+            .thrownExceptions(method.getThrowsExceptions())
+            .calledMethods(splitCsv(method.getCalledMethods()))
             .hasLoops(method.getHasLoops())
             .hasConditionals(method.getHasConditionals())
             .hasTryCatch(method.getHasTryCatch())
@@ -222,6 +225,16 @@ public class MethodResponseDTO {
         if (cyclomaticComplexity <= 10) return "MODERATE";
         if (cyclomaticComplexity <= 20) return "COMPLEX";
         return "VERY_COMPLEX";
+    }
+
+    private static List<String> splitCsv(String value) {
+        if (value == null || value.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(value.split(","))
+            .map(String::trim)
+            .filter(item -> !item.isEmpty())
+            .collect(Collectors.toList());
     }
 }
 
