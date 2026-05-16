@@ -1,6 +1,6 @@
 import ThemeToggle from "./ThemeToggle";
 
-export default function Navbar({ dark, onToggle, onEnter }) {
+export default function Navbar({ dark, onToggle, onEnter, onSignIn }) {
   return (
     <>
       <nav className="navbar">
@@ -14,7 +14,19 @@ export default function Navbar({ dark, onToggle, onEnter }) {
         <div className="navbar-logo">CODESHERIFF</div>
         <div className="navbar-actions">
           <ThemeToggle dark={dark} onToggle={onToggle} />
-          <span className="navbar-signin">SIGN IN</span>
+          <button
+            className="navbar-signin"
+            onClick={onSignIn}
+            style={{
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+              color: "inherit",
+              fontSize: "inherit",
+            }}
+          >
+            SIGN IN
+          </button>
           <button className="navbar-cta" onClick={onEnter}>
             GET STARTED →
           </button>

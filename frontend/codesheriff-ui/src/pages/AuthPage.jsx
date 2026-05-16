@@ -365,4 +365,4 @@ export default function AuthPage({ onBack, onAuthSuccess, dark, onToggle }) {
   );
 }
 
-// Made with Bob
+

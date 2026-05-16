@@ -11,20 +11,20 @@ export default function App() {
   const [dark, setDark] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   const th = dark ? DARK : LIGHT;
   const toggle = () => setDark((d) => !d);
 
   // Check for existing session on mount
   useEffect(() => {
     checkUser();
-    
+
     // Listen for auth state changes
-    const { data: { subscription } } = authService.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
+    const {
+      data: { subscription },
+    } = authService.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -57,14 +57,17 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className={dark ? "theme-dark" : "theme-light"} style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "var(--bg)",
-        color: "var(--text)"
-      }}>
+      <div
+        className={dark ? "theme-dark" : "theme-light"}
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--bg)",
+          color: "var(--text)",
+        }}
+      >
         <div>Loading...</div>
       </div>
     );
@@ -74,11 +77,12 @@ export default function App() {
     <div className={dark ? "theme-dark" : "theme-light"}>
       {page === "landing" ? (
         <LandingPage
-          onEnter={() => user ? setPage("dashboard") : setPage("auth")}
+          onEnter={() => (user ? setPage("dashboard") : setPage("auth"))}
           onSignIn={() => setPage("auth")}
           dark={dark}
           onToggle={toggle}
           user={user}
+          th={th}
         />
       ) : page === "auth" ? (
         <AuthPage
@@ -86,6 +90,7 @@ export default function App() {
           onAuthSuccess={handleAuthSuccess}
           dark={dark}
           onToggle={toggle}
+          th={th}
         />
       ) : (
         <Dashboard
@@ -93,6 +98,7 @@ export default function App() {
           onSignOut={handleSignOut}
           dark={dark}
           onToggle={toggle}
+          th={th}
           user={user}
         />
       )}
