@@ -96,6 +96,25 @@ public class BobOutput {
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 
+    // Additional fields for DTOs and controllers
+    @Column(name = "analysis_text", columnDefinition = "TEXT")
+    private String analysisText;
+
+    @Column(name = "test_coverage")
+    private String testCoverage;
+
+    @Column(name = "prompt_tokens")
+    private Integer promptTokens;
+
+    @Column(name = "completion_tokens")
+    private Integer completionTokens;
+
+    @Column(name = "total_tokens")
+    private Integer totalTokens;
+
+    @Column(name = "response_time_ms")
+    private Long responseTimeMs;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -106,6 +125,11 @@ public class BobOutput {
 
     public BobOutput(Method method) {
         this.method = method;
+    }
+
+    public BobOutput(Method method, User user) {
+        this.method = method;
+        // User is not stored in BobOutput, but constructor exists for compatibility
     }
 
     // Getters and Setters
@@ -291,6 +315,54 @@ public class BobOutput {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getAnalysisText() {
+        return analysisText;
+    }
+
+    public void setAnalysisText(String analysisText) {
+        this.analysisText = analysisText;
+    }
+
+    public String getTestCoverage() {
+        return testCoverage;
+    }
+
+    public void setTestCoverage(String testCoverage) {
+        this.testCoverage = testCoverage;
+    }
+
+    public Integer getPromptTokens() {
+        return promptTokens;
+    }
+
+    public void setPromptTokens(Integer promptTokens) {
+        this.promptTokens = promptTokens;
+    }
+
+    public Integer getCompletionTokens() {
+        return completionTokens;
+    }
+
+    public void setCompletionTokens(Integer completionTokens) {
+        this.completionTokens = completionTokens;
+    }
+
+    public Integer getTotalTokens() {
+        return totalTokens;
+    }
+
+    public void setTotalTokens(Integer totalTokens) {
+        this.totalTokens = totalTokens;
+    }
+
+    public Long getResponseTimeMs() {
+        return responseTimeMs;
+    }
+
+    public void setResponseTimeMs(Long responseTimeMs) {
+        this.responseTimeMs = responseTimeMs;
     }
 
     // Business logic helpers

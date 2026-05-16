@@ -1,8 +1,6 @@
 package com.backend.CodeSheriff.Security;
 
 import com.backend.CodeSheriff.Entity.*;
-import com.backend.CodeSheriff.Model.BobAnalysis;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -81,9 +79,11 @@ public class HallucinationShield {
             complexity += method.findAll(com.github.javaparser.ast.stmt.ForEachStmt.class).size();
             
             // Count switch cases
+            AtomicInteger switchComplexity = new AtomicInteger(0);
             method.findAll(com.github.javaparser.ast.stmt.SwitchStmt.class).forEach(switchStmt -> {
-                complexity += switchStmt.getEntries().size();
+                switchComplexity.addAndGet(switchStmt.getEntries().size());
             });
+            complexity += switchComplexity.get();
             
             // Count catch blocks
             complexity += method.findAll(com.github.javaparser.ast.stmt.CatchClause.class).size();
@@ -92,10 +92,11 @@ public class HallucinationShield {
             complexity += method.findAll(com.github.javaparser.ast.expr.ConditionalExpr.class).size();
             
             // Count logical operators (&&, ||)
-            complexity += method.findAll(com.github.javaparser.ast.expr.BinaryExpr.class).stream()
+            long logicalOps = method.findAll(com.github.javaparser.ast.expr.BinaryExpr.class).stream()
                 .filter(expr -> expr.getOperator() == com.github.javaparser.ast.expr.BinaryExpr.Operator.AND ||
                                expr.getOperator() == com.github.javaparser.ast.expr.BinaryExpr.Operator.OR)
                 .count();
+            complexity += (int) logicalOps;
             
             return complexity;
         }

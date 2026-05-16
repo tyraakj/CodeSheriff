@@ -93,7 +93,7 @@ public class ASI01InjectionDetector {
         List<SecurityFlag> flags = new ArrayList<>();
         
         // Scan all comments in the class
-        compilationUnit.getAllComments().forEach(comment -> {
+        compilationUnit.getAllContainedComments().forEach(comment -> {
             List<SecurityFlag> commentFlags = scanComment(comment, javaClass, securityScan);
             flags.addAll(commentFlags);
         });
@@ -127,7 +127,7 @@ public class ASI01InjectionDetector {
         List<SecurityFlag> flags = new ArrayList<>();
         
         // Scan method comments
-        methodNode.getAllComments().forEach(comment -> {
+        methodNode.getAllContainedComments().forEach(comment -> {
             List<SecurityFlag> commentFlags = scanComment(comment, javaClass, method, securityScan);
             flags.addAll(commentFlags);
         });

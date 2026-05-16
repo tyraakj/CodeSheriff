@@ -245,6 +245,94 @@ public class AnalysisService {
     }
 
     /**
+     * Get analysis by ID (overloaded for Long).
+     * @param id the analysis ID as Long
+     * @return the analysis
+     */
+    @Transactional(readOnly = true)
+    public Analysis getAnalysisById(Long id) {
+        // This method exists for compatibility but Analysis uses UUID
+        throw new UnsupportedOperationException("Analysis uses UUID, not Long");
+    }
+
+    /**
+     * Get analysis by ID.
+     * @param id the analysis ID
+     * @return the analysis
+     */
+    @Transactional(readOnly = true)
+    public Analysis getAnalysisById(UUID id) {
+        return analysisRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Analysis not found: " + id));
+    }
+
+    /**
+     * Get method by name within an analysis.
+     * @param analysisId the analysis ID
+     * @param className the class name
+     * @param methodName the method name
+     * @return the method
+     */
+    @Transactional(readOnly = true)
+    public Method getMethodByName(UUID analysisId, String className, String methodName) {
+        List<Method> methods = methodRepository.findByAnalysisId(analysisId);
+        return methods.stream()
+            .filter(m -> m.getJavaClass().getClassName().equals(className) 
+                      && m.getMethodName().equals(methodName))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(
+                String.format("Method not found: %s.%s in analysis %s", className, methodName, analysisId)));
+    }
+
+    /**
+     * Get analysis by project name for a user.
+     * @param userId the user ID
+     * @param projectName the project name
+     * @return the analysis
+     */
+    @Transactional(readOnly = true)
+    public Analysis getAnalysisByProjectName(UUID userId, String projectName) {
+        return analysisRepository.findByUserUserIdAndProjectName(userId, projectName)
+            .orElseThrow(() -> new IllegalArgumentException(
+                String.format("Analysis not found for user %s with project name: %s", userId, projectName)));
+    }
+
+    /**
+     * Get method by ID.
+     * @param id the method ID as Long
+     * @return the method
+     */
+    @Transactional(readOnly = true)
+    public Method getMethodById(Long id) {
+        // Method uses UUID, but this method exists for compatibility
+        throw new UnsupportedOperationException("Method uses UUID, not Long");
+    }
+
+    /**
+     * Get Bob outputs for a method with pagination.
+     * @param methodId the method ID as Long
+     * @param pageable the pagination info
+     * @return page of Bob outputs
+     */
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<BobOutput> getMethodBobOutputs(Long methodId, org.springframework.data.domain.Pageable pageable) {
+        // Method uses UUID, but this method exists for compatibility
+        throw new UnsupportedOperationException("Method uses UUID, not Long");
+    }
+
+    /**
+     * Get security scans for an analysis with pagination.
+     * @param analysisId the analysis ID as Long
+     * @param pageable the pagination info
+     * @return page of security scans
+     */
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<SecurityScan> getSecurityScans(Long analysisId, org.springframework.data.domain.Pageable pageable) {
+        // Analysis uses UUID, but this method exists for compatibility
+        throw new UnsupportedOperationException("Analysis uses UUID, not Long");
+    }
+
+    /**
      * Get analysis statistics.
      * @param analysisId the analysis ID
      * @return analysis statistics

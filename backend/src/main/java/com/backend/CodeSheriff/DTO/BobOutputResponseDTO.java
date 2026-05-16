@@ -35,6 +35,10 @@ public class BobOutputResponseDTO {
     private Long processingTimeMs;
     private Instant createdAt;
     
+    // Additional fields for controllers
+    private Integer securityFlagCount;
+    private Integer criticalFlagCount;
+    
     // Constructor
     public BobOutputResponseDTO() {
     }
@@ -65,6 +69,8 @@ public class BobOutputResponseDTO {
         dto.setTokensUsed(bobOutput.getTokensUsed());
         dto.setProcessingTimeMs(bobOutput.getProcessingTimeMs());
         dto.setCreatedAt(bobOutput.getCreatedAt());
+        dto.setSecurityFlagCount(0); // Default, can be set by caller
+        dto.setCriticalFlagCount(0); // Default, can be set by caller
         return dto;
     }
     
@@ -137,6 +143,12 @@ public class BobOutputResponseDTO {
     
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    
+    public Integer getSecurityFlagCount() { return securityFlagCount; }
+    public void setSecurityFlagCount(Integer securityFlagCount) { this.securityFlagCount = securityFlagCount; }
+    
+    public Integer getCriticalFlagCount() { return criticalFlagCount; }
+    public void setCriticalFlagCount(Integer criticalFlagCount) { this.criticalFlagCount = criticalFlagCount; }
 }
 
 // Made with Bob

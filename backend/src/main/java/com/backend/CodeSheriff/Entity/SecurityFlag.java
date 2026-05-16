@@ -99,9 +99,36 @@ public class SecurityFlag {
     @Column(name = "detection_metadata", columnDefinition = "TEXT")
     private String detectionMetadata; // JSON string with additional detection details
 
+    // Additional fields for DTOs and controllers
+    @Column(name = "status", length = 50)
+    private String status;
+
+    @Column(name = "resolution", columnDefinition = "TEXT")
+    private String resolution;
+
+    @Column(name = "resolved_by", length = 255)
+    private String resolvedBy;
+
+    @Column(name = "false_positive")
+    private Boolean falsePositive = false;
+
+    @Column(name = "false_positive_reason", columnDefinition = "TEXT")
+    private String falsePositiveReason;
+
+    @Column(name = "updated_at")
+    private java.time.LocalDateTime updatedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    // Relationships
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "method_id", foreignKey = @ForeignKey(name = "fk_security_flags_method"))
+    private Method method;
+
+    @Column(name = "java_class_name", length = 255)
+    private String javaClassName;
 
     // Constructors
     public SecurityFlag() {
@@ -281,6 +308,70 @@ public class SecurityFlag {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
+    }
+
+    public String getResolvedBy() {
+        return resolvedBy;
+    }
+
+    public void setResolvedBy(String resolvedBy) {
+        this.resolvedBy = resolvedBy;
+    }
+
+    public Boolean getFalsePositive() {
+        return falsePositive;
+    }
+
+    public void setFalsePositive(Boolean falsePositive) {
+        this.falsePositive = falsePositive;
+    }
+
+    public String getFalsePositiveReason() {
+        return falsePositiveReason;
+    }
+
+    public void setFalsePositiveReason(String falsePositiveReason) {
+        this.falsePositiveReason = falsePositiveReason;
+    }
+
+    public java.time.LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public void setMethod(Method method) {
+        this.method = method;
+    }
+
+    public String getJavaClassName() {
+        return javaClassName;
+    }
+
+    public void setJavaClassName(String javaClassName) {
+        this.javaClassName = javaClassName;
     }
 
     // Business logic helpers

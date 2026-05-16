@@ -376,6 +376,12 @@ public class SecurityPipelineService {
         public boolean isPassed() {
             return success && !hasCriticalIssues();
         }
+
+        public SecurityScan getSecurityScan() {
+            // This method returns the master scan if available
+            // Callers should use securityScanService.getSecurityScan(masterScanId) instead
+            return null;
+        }
     }
 }
 

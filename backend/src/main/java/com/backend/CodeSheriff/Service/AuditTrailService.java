@@ -241,6 +241,88 @@ public class AuditTrailService {
     }
 
     /**
+     * Log a file upload with processing time.
+     * @param user the user
+     * @param analysis the analysis
+     * @param filename the filename
+     * @param processingTime the processing time in milliseconds
+     * @param ipAddress the IP address
+     */
+    public void logUpload(User user, com.backend.CodeSheriff.Entity.Analysis analysis, 
+                          String filename, long processingTime, String ipAddress) {
+        try {
+            String actionDetails = String.format(
+                "{\"filename\":\"%s\",\"processingTime\":%d,\"projectName\":\"%s\"}",
+                filename, processingTime, analysis.getProjectName()
+            );
+            
+            AuditTrail.Builder builder = new AuditTrail.Builder("file_upload")
+                .user(user)
+                .resourceType("analysis")
+                .resourceId(analysis.getAnalysisId())
+                .status("success")
+                .durationMs(processingTime)
+                .actionDetails(actionDetails)
+                .ipAddress(ipAddress);
+            
+            auditTrailRepository.save(builder.build());
+            logger.info("Upload logged: {} - {} ({}ms)", filename, analysis.getAnalysisId(), processingTime);
+        } catch (Exception e) {
+            logger.error("Failed to log upload: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Log a Bob analysis with output type and latency (for analysis-level logging).
+     * @param user the user
+     * @param analysisId the analysis ID
+     * @param outputType the output type
+     * @param latencyMs the latency in milliseconds
+     * @param request the HTTP request
+     */
+    public void logBobAnalysisForAnalysis(User user, UUID analysisId, String outputType,
+                                long latencyMs, HttpServletRequest request) {
+        try {
+            String actionDetails = String.format("{\"outputType\":\"%s\"}", outputType);
+            
+            logTimedAction(user, "bob_analysis", "analysis", analysisId, "success", latencyMs, request);
+            logger.info("Bob analysis logged: {} - {} ({}ms)", analysisId, outputType, latencyMs);
+        } catch (Exception e) {
+            logger.error("Failed to log Bob analysis: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Log an analysis deletion.
+     * @param user the user
+     * @param analysis the analysis being deleted
+     * @param ipAddress the IP address
+     */
+    public void logAnalysisDeletion(User user, com.backend.CodeSheriff.Entity.Analysis analysis, String ipAddress) {
+        try {
+            String actionDetails = String.format(
+                "{\"projectName\":\"%s\",\"totalClasses\":%d,\"totalMethods\":%d}",
+                analysis.getProjectName(), 
+                analysis.getTotalClasses() != null ? analysis.getTotalClasses() : 0,
+                analysis.getTotalMethods() != null ? analysis.getTotalMethods() : 0
+            );
+            
+            AuditTrail.Builder builder = new AuditTrail.Builder("analysis_deletion")
+                .user(user)
+                .resourceType("analysis")
+                .resourceId(analysis.getAnalysisId())
+                .status("success")
+                .actionDetails(actionDetails)
+                .ipAddress(ipAddress);
+            
+            auditTrailRepository.save(builder.build());
+            logger.info("Analysis deletion logged: {}", analysis.getAnalysisId());
+        } catch (Exception e) {
+            logger.error("Failed to log analysis deletion: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
      * Get client IP address from request, handling proxies.
      * @param request the HTTP request
      * @return the client IP address

@@ -15,15 +15,14 @@ export default function App() {
   const th = dark ? DARK : LIGHT;
   const toggle = () => setDark((d) => !d);
 
-  // Check for existing session on mount
   useEffect(() => {
     checkUser();
 
-    // Listen for auth state changes
     const {
       data: { subscription },
     } = authService.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -55,6 +54,15 @@ export default function App() {
     }
   };
 
+  // Navigate to dashboard only if user exists
+  const handleEnter = () => {
+    if (user) {
+      setPage("dashboard");
+    } else {
+      setPage("auth");
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -73,35 +81,68 @@ export default function App() {
     );
   }
 
+  const renderPage = () => {
+    switch (page) {
+      case "landing":
+        return (
+          <LandingPage
+            onEnter={handleEnter}
+            onSignIn={() => setPage("auth")}
+            dark={dark}
+            onToggle={toggle}
+            user={user}
+            th={th}
+          />
+        );
+
+      case "auth":
+        // If already logged in redirect to dashboard
+        if (user) {
+          setPage("dashboard");
+          return null;
+        }
+        return (
+          <AuthPage
+            onBack={() => setPage("landing")}
+            onAuthSuccess={handleAuthSuccess}
+            dark={dark}
+            onToggle={toggle}
+            th={th}
+          />
+        );
+
+      case "dashboard":
+        // Protected — redirect to auth if no user
+        if (!user) {
+          setPage("auth");
+          return null;
+        }
+        return (
+          <Dashboard
+            onBack={() => setPage("landing")}
+            onSignOut={handleSignOut}
+            dark={dark}
+            onToggle={toggle}
+            th={th}
+            user={user}
+          />
+        );
+
+      default:
+        return (
+          <LandingPage
+            onEnter={handleEnter}
+            onSignIn={() => setPage("auth")}
+            dark={dark}
+            onToggle={toggle}
+            user={user}
+            th={th}
+          />
+        );
+    }
+  };
+
   return (
-    <div className={dark ? "theme-dark" : "theme-light"}>
-      {page === "landing" ? (
-        <LandingPage
-          onEnter={() => (user ? setPage("dashboard") : setPage("auth"))}
-          onSignIn={() => setPage("auth")}
-          dark={dark}
-          onToggle={toggle}
-          user={user}
-          th={th}
-        />
-      ) : page === "auth" ? (
-        <AuthPage
-          onBack={() => setPage("landing")}
-          onAuthSuccess={handleAuthSuccess}
-          dark={dark}
-          onToggle={toggle}
-          th={th}
-        />
-      ) : (
-        <Dashboard
-          onBack={() => setPage("landing")}
-          onSignOut={handleSignOut}
-          dark={dark}
-          onToggle={toggle}
-          th={th}
-          user={user}
-        />
-      )}
-    </div>
+    <div className={dark ? "theme-dark" : "theme-light"}>{renderPage()}</div>
   );
 }

@@ -52,7 +52,27 @@ public class UserService {
     /**
      * Get or create user from Supabase Auth.
      * This method is called after JWT authentication to ensure the user exists in our database.
-     * 
+     *
+     * @param supabaseId the Supabase Auth user ID as String
+     * @param email the user's email
+     * @return the user entity
+     */
+    public User getOrCreateUser(String supabaseId, String email) {
+        logger.debug("Getting or creating user: {} ({})", email, supabaseId);
+        
+        UUID userId = UUID.fromString(supabaseId);
+        
+        return userRepository.findById(userId)
+            .orElseGet(() -> {
+                logger.info("Creating new user: {} ({})", email, userId);
+                User newUser = new User(userId, email);
+                newUser.setIsActive(true);
+                return userRepository.save(newUser);
+            });
+    }
+
+    /**
+     * Get or create user from Supabase Auth (UUID overload).
      * @param userId the Supabase Auth user ID
      * @param email the user's email
      * @return the user entity

@@ -30,6 +30,9 @@ public class Method {
     @Column(name = "method_id", nullable = false, updatable = false)
     private UUID methodId;
 
+    @Column(name = "id")
+    private Long id;
+
     @NotNull(message = "Java class is required")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "class_id", nullable = false, foreignKey = @ForeignKey(name = "fk_methods_class"))
@@ -99,6 +102,46 @@ public class Method {
     @Column(name = "javadoc", columnDefinition = "TEXT")
     private String javadoc;
 
+    // Additional fields for DTOs and controllers
+    @Column(name = "line_start")
+    private Integer lineStart;
+
+    @Column(name = "line_end")
+    private Integer lineEnd;
+
+    @Column(name = "lines_of_code")
+    private Integer linesOfCode;
+
+    @Column(name = "cognitive_complexity")
+    private Integer cognitiveComplexity;
+
+    @Column(name = "parameter_count")
+    private Integer parameterCount;
+
+    @Column(name = "local_variable_count")
+    private Integer localVariableCount;
+
+    @Column(name = "annotations_text", columnDefinition = "TEXT")
+    private String annotationsText;
+
+    @Column(name = "thrown_exceptions", columnDefinition = "TEXT")
+    private String thrownExceptions;
+
+    @Column(name = "called_methods", columnDefinition = "TEXT")
+    private String calledMethods;
+
+    @Column(name = "has_loops")
+    private Boolean hasLoops = false;
+
+    @Column(name = "has_conditionals")
+    private Boolean hasConditionals = false;
+
+    @Column(name = "has_try_catch")
+    private Boolean hasTryCatch = false;
+
+    @Column(name = "updated_at")
+    private java.time.LocalDateTime updatedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -106,6 +149,12 @@ public class Method {
     // Relationships
     @OneToOne(mappedBy = "method", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private BobOutput bobOutput;
+
+    @OneToMany(mappedBy = "method", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<BobOutput> bobOutputs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "method", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<SecurityFlag> securityFlags = new ArrayList<>();
 
     // Constructors
     public Method() {
@@ -267,6 +316,134 @@ public class Method {
 
     public void setBobOutput(BobOutput bobOutput) {
         this.bobOutput = bobOutput;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getLineStart() {
+        return lineStart;
+    }
+
+    public void setLineStart(Integer lineStart) {
+        this.lineStart = lineStart;
+    }
+
+    public Integer getLineEnd() {
+        return lineEnd;
+    }
+
+    public void setLineEnd(Integer lineEnd) {
+        this.lineEnd = lineEnd;
+    }
+
+    public Integer getLinesOfCode() {
+        return linesOfCode;
+    }
+
+    public void setLinesOfCode(Integer linesOfCode) {
+        this.linesOfCode = linesOfCode;
+    }
+
+    public Integer getCognitiveComplexity() {
+        return cognitiveComplexity;
+    }
+
+    public void setCognitiveComplexity(Integer cognitiveComplexity) {
+        this.cognitiveComplexity = cognitiveComplexity;
+    }
+
+    public Integer getParameterCount() {
+        return parameterCount;
+    }
+
+    public void setParameterCount(Integer parameterCount) {
+        this.parameterCount = parameterCount;
+    }
+
+    public Integer getLocalVariableCount() {
+        return localVariableCount;
+    }
+
+    public void setLocalVariableCount(Integer localVariableCount) {
+        this.localVariableCount = localVariableCount;
+    }
+
+    public String getAnnotationsText() {
+        return annotationsText;
+    }
+
+    public void setAnnotationsText(String annotationsText) {
+        this.annotationsText = annotationsText;
+    }
+
+    public String getThrownExceptions() {
+        return thrownExceptions;
+    }
+
+    public void setThrownExceptions(String thrownExceptions) {
+        this.thrownExceptions = thrownExceptions;
+    }
+
+    public String getCalledMethods() {
+        return calledMethods;
+    }
+
+    public void setCalledMethods(String calledMethods) {
+        this.calledMethods = calledMethods;
+    }
+
+    public Boolean getHasLoops() {
+        return hasLoops;
+    }
+
+    public void setHasLoops(Boolean hasLoops) {
+        this.hasLoops = hasLoops;
+    }
+
+    public Boolean getHasConditionals() {
+        return hasConditionals;
+    }
+
+    public void setHasConditionals(Boolean hasConditionals) {
+        this.hasConditionals = hasConditionals;
+    }
+
+    public Boolean getHasTryCatch() {
+        return hasTryCatch;
+    }
+
+    public void setHasTryCatch(Boolean hasTryCatch) {
+        this.hasTryCatch = hasTryCatch;
+    }
+
+    public java.time.LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public List<BobOutput> getBobOutputs() {
+        return bobOutputs;
+    }
+
+    public void setBobOutputs(List<BobOutput> bobOutputs) {
+        this.bobOutputs = bobOutputs;
+    }
+
+    public List<SecurityFlag> getSecurityFlags() {
+        return securityFlags;
+    }
+
+    public void setSecurityFlags(List<SecurityFlag> securityFlags) {
+        this.securityFlags = securityFlags;
     }
 
     // Business logic helpers

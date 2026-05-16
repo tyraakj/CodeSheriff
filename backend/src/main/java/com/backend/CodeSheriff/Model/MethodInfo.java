@@ -18,4 +18,28 @@ public class MethodInfo {
     private int lineStart;
     private String body;
     private String params;
+    
+    // Additional fields for DTOs and controllers
+    private String methodName;
+    private String parameters;
+    private String modifiers;
+    private Boolean isStatic;
+    private Boolean isFinal;
+    private Boolean isAbstract;
+    private Boolean isSynchronized;
+    private Boolean isConstructor;
+    private Integer lineEnd;
+    private Integer linesOfCode;
+    private Integer cyclomaticComplexity;
+    private Integer cognitiveComplexity;
+    private Integer parameterCount;
+    private Integer localVariableCount;
+    private String sourceCode;
+    private String javadoc;
+    private String annotations;
+    private String thrownExceptions;
+    private String calledMethods;
+    private Boolean hasLoops;
+    private Boolean hasConditionals;
+    private Boolean hasTryCatch;
 }
